@@ -6,9 +6,13 @@ authors = [
     {name = "aicorein", email = "aicorein@meloland.org"},
 ]
 dependencies = [
-    "melobot[onebot]>=3.0.0",
+    "melobot>=3.1.0",
+    "melobot[onebot]",
+    "melobot[cli]",
     "uvloop>=0.21.0; sys_platform != 'win32'",
     "pillow>=11.0.0",
+    "psutil>=6.1.1",
+    "matplotlib>=3.10.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"
@@ -39,7 +43,9 @@ line_length = 100
 [tool.pdm]
 distribution = true
 
-[tool.pdm.dev-dependencies]
+
+[dependency-groups]
 dev = [
     "ipython>=8.29.0",
+    "viztracer>=1.0.2",
 ]

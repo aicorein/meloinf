@@ -3,24 +3,18 @@ from random import choice, random
 
 from melobot import PluginPlanner, get_bot, send_text
 from melobot.handle import get_event, stop
-from melobot.protocols.onebot.v11 import Adapter, on_message
-from melobot.protocols.onebot.v11.adapter.event import MessageEvent
-from melobot.protocols.onebot.v11.handle import GetParseArgs
-from melobot.protocols.onebot.v11.utils import CmdArgFormatter as Fmtter
-from melobot.protocols.onebot.v11.utils import CmdParser, ParseArgs
+from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
 from melobot.utils import if_not, lock
+from melobot.utils.parse import CmdArgs, CmdParser
 
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY, FormatCb, get_white_checker
+from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...platform.onebot import CmdArgFmtter as Fmtter
+from ...platform.onebot import get_white_checker
 from ...utils import ENG_PUNC, HANS_PUNC, remove_punctuation
 from .. import base_utils as BASE_INFO
 from .wdict import BOT_FLAG, OWNER_FLAG, SENDER_FLAG, WORD_DICT, add_pair
 
-_fmt_err_cbs = {
-    "convert_fail": FormatCb.convert_fail,
-    "validate_fail": FormatCb.validate_fail,
-    "arg_lack": FormatCb.arg_lack,
-}
 bot = get_bot()
 OB_ADAPTER = bot.get_adapter(Adapter)
 assert isinstance(OB_ADAPTER, Adapter)
@@ -41,13 +35,11 @@ TEACH_PARSER = CmdParser(
             validate=lambda x: len(x) <= 20 and "##" not in x,
             src_desc="触发语句",
             src_expect="字符数 <= 20 且不包含 ## 符号",
-            **_fmt_err_cbs,
         ),
         Fmtter(
             validate=lambda x: len(x) <= 200 and "##" not in x,
             src_desc="回复语句",
             src_expect="字符数 <= 200 且不包含 ## 符号",
-            **_fmt_err_cbs,
         ),
     ],
 )
@@ -62,7 +54,18 @@ WordLib = PluginPlanner("1.4.0")
 @WordLib.use
 @on_message(checker=COMMON_CHECKER)
 async def make_reply(event: MessageEvent) -> None:
-    keys = await get_keys(event)
+    text = event.text.replace("\n", "").strip(" ")
+    text = remove_punctuation(text)
+    text = re.sub(rf"({'|'.join(NICKNAMES)})", BOT_FLAG, text)
+
+    keys: set[str] = set()
+    for qid in event.get_datas("at", "qq"):
+        if qid == BASE_INFO.onebot_id:
+            keys.add(f"{BOT_FLAG}{text}")
+            keys.add(f"{text}{BOT_FLAG}")
+            break
+    keys.add(text)
+
     output = get_random_reply(event, keys)
     if len(output):
         await send_text(output)
@@ -75,12 +78,19 @@ async def get_wlib_info() -> None:
 
 
 @WordLib.use
-@on_message(checker=COMMON_CHECKER, parser=TEACH_PARSER)
-@if_not(lambda: TEACH_CHECKER.check(get_event()), reject=stop)
-@lock(
-    lambda: OB_ADAPTER.send_reply(f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~")
+@on_message(
+    checker=COMMON_CHECKER,
+    parser=TEACH_PARSER,
+    decos=[
+        if_not(lambda: TEACH_CHECKER.check(get_event()), reject=stop),
+        lock(
+            lambda: OB_ADAPTER.send_reply(
+                f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~"
+            )
+        ),
+    ],
 )
-async def wlib_teach(adapter: Adapter, args: ParseArgs = GetParseArgs()) -> None:
+async def wlib_teach(adapter: Adapter, args: CmdArgs) -> None:
     ask, ans = args.vals
     punc = ENG_PUNC.replace("$", "") + HANS_PUNC
     ask = re.sub(rf"[{re.escape(punc)}]", "", ask)
@@ -90,20 +100,6 @@ async def wlib_teach(adapter: Adapter, args: ParseArgs = GetParseArgs()) -> None
         await adapter.send_reply(f"{NICKNAME} 学会啦！")
     else:
         await adapter.send_reply(f"这个 {NICKNAME} 已经会了哦~")
-
-
-async def get_keys(event: MessageEvent) -> list[str]:
-    text = event.text.replace("\n", "").strip(" ")
-    text = remove_punctuation(text)
-    text = re.sub(rf"({'|'.join(NICKNAMES)})", BOT_FLAG, text)
-
-    for qid in event.get_datas("at", "qq"):
-        if qid == (BASE_INFO.onebot_id):
-            keys = []
-            keys.append(f"{BOT_FLAG}{text}")
-            keys.append(f"{text}{BOT_FLAG}")
-            return keys
-    return [text]
 
 
 def get_random_reply(event: MessageEvent, keys: list[str]) -> str:

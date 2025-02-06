@@ -1,2 +1,3 @@
+python.use_venv = true
 venv.backend = "virtualenv"
 venv.with_pip = true

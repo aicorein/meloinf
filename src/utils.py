@@ -28,7 +28,7 @@ def base64_encode(data: bytes) -> str:
 
 
 def get_headers() -> dict:
-    return deepcopy(ALL_CONFIG["request_headers"])
+    return deepcopy(ALL_CONFIG["http_headers"])
 
 
 @asynccontextmanager
@@ -40,8 +40,11 @@ async def async_http(
     data: Optional[dict] = None,
     json: Optional[dict] = None,
     proxy: bool = False,
+    verify_ssl: bool = True,
 ) -> AsyncGenerator[aiohttp.ClientResponse, None]:
-    async with aiohttp.ClientSession(headers=headers) as http_session:
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(verify_ssl=verify_ssl), headers=headers
+    ) as http_session:
         kwargs = {}
         if proxy:
             kwargs["proxy"] = ENVS.http_proxy

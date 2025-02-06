@@ -30,6 +30,8 @@ class BotEnvs:
         self.http_proxy: str = BOT_CONFIG["http_proxy"]
         self.figure_font: str = to_abs_path(BOT_CONFIG["figure_font"])
         self.weather_key: str = BOT_CONFIG["weather_key"]
+        self.dice_config: str = to_abs_path(BOT_CONFIG["dice_config"])
+        self.dice_data_dir: str = to_abs_path(BOT_CONFIG["dice_data_dir"])
         self.dice_base_r: tuple[int, int] = tuple(BOT_CONFIG["dice_base_r"])
         self.txt2img_font: str = to_abs_path(BOT_CONFIG["txt2img_font"])
         self.baidu_translate_appid: str = BOT_CONFIG["baidu_translate_appid"]

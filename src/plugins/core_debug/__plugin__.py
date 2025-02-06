@@ -5,11 +5,9 @@ import melobot
 from melobot import PluginPlanner, get_bot, send_text
 from melobot.di import Reflect
 from melobot.handle import get_event, stop
-from melobot.protocols.onebot.v11 import Adapter, msg_session, on_message
-from melobot.protocols.onebot.v11.adapter.event import MessageEvent
-from melobot.protocols.onebot.v11.adapter.segment import ImageSegment
+from melobot.protocols.onebot.v11 import Adapter, ImageSegment, MessageEvent, on_message
 from melobot.session import suspend
-from melobot.utils import if_not, unfold_ctx
+from melobot.utils import if_not
 
 from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker
 from ...utils import base64_encode
@@ -34,16 +32,20 @@ async def format_send(send_func: Callable, s: str) -> None:
     elif len(s) > 10000:
         await send_func("<返回结果长度大于 10000，请使用调试器>")
     else:
-        data = await base_utils.txt2img(s, wrap_len=70, font_size=16)
+        data = base_utils.txt2img(s, wrap_len=70, font_size=16)
         data = base64_encode(data)
         await send_func(ImageSegment(file=data))
 
 
 @CoreDbg.use
-@on_message(checker=COMMON_CHECKER)
-@unfold_ctx(msg_session)
-@if_not(lambda: Store.parser.parse(get_event().text), reject=stop)
-@if_not(lambda: Store.checker.check(get_event()), reject=stop)
+@on_message(
+    checker=COMMON_CHECKER,
+    legacy_session=True,
+    decos=[
+        if_not(lambda: Store.parser.parse(get_event().text), reject=stop),
+        if_not(lambda: Store.checker.check(get_event()), reject=stop),
+    ],
+)
 async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> None:
     await send_text(
         "【你已进入核心调试状态】\n" + "注意 ⚠️：错误操作可能导致崩溃，请谨慎操作！"

@@ -32,7 +32,7 @@ def wrap_s(s: str, wrap_len: int) -> list[str]:
     return [s[i : i + wrap_len] for i in range(0, len(s), wrap_len)]
 
 
-async def txt2img(
+def txt2img(
     s: str,
     wrap_len: int = 70,
     font_size: int = 18,
@@ -51,6 +51,6 @@ async def txt2img(
     return imgio.getvalue()
 
 
-# async def txt2msgs(s: str, one_msg_len: int = 300):
+# def txt2msgs(s: str, one_msg_len: int = 300):
 #     txt_list = list(map(lambda x: x.strip("\n"), wrap_s(s, one_msg_len)))
 #     return [text_msg(txt) for txt in txt_list]

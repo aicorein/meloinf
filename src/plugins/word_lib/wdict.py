@@ -16,10 +16,10 @@ for k, v in amap:
 
 
 def save_dict() -> None:
-    with open(LIB_PATH, "w", encoding="utf-8") as fp:
-        for k, vals in WORD_DICT.items():
-            for v in vals:
-                fp.write(f"{k}##{v}\n")
+    with open(LIB_PATH, "w", encoding="utf-8") as f:
+        for key, vals in WORD_DICT.items():
+            for val in vals:
+                f.write(f"{key}##{val}\n")
 
 
 def add_pair(ask: str, ans: str) -> bool:
@@ -32,8 +32,7 @@ def add_pair(ask: str, ans: str) -> bool:
         ans_arr.append(ans)
         save_dict()
         return True
-    else:
-        return False
+    return False
 
 
 WORD_DICT = adict

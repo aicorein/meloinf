@@ -4,11 +4,10 @@ import string
 
 from melobot import PluginPlanner, send_text
 from melobot.protocols.onebot.v11 import on_message
-from melobot.protocols.onebot.v11.handle import GetParseArgs
-from melobot.protocols.onebot.v11.utils import CmdArgFormatter as Fmtter
-from melobot.protocols.onebot.v11.utils import ParseArgs
+from melobot.utils.parse import CmdArgs
 
 from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...platform.onebot import CmdArgFmtter as Fmtter
 from .gen import BullShitGenerator
 
 BullShitGen = PluginPlanner("1.1.0")
@@ -32,7 +31,7 @@ PUNC = string.punctuation + r"。，、；：？！…—·ˉ¨‘’“”々�
         ],
     ),
 )
-async def bullshit_gen(args: ParseArgs = GetParseArgs()) -> None:
+async def bullshit_gen(args: CmdArgs) -> None:
     theme = args.vals[0]
     output = BullShitGenerator(theme, GEN_LENGTH).generate()
     await send_text(output)
