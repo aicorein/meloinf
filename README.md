@@ -51,16 +51,11 @@ python -m melobot run main.py
 
 此外，本项目借鉴或修改了来自以下项目的代码、数据文件。所有原始的 LICENSE 文件已保留，本项目的许可证也与以下项目兼容。
 
-- https://github.com/Giftia/Project_Xiaoye
-    > [./src/data/wordlib/LICENSE-GPL](./src/data/wordlib/LICENSE-GPL)
-
-- https://github.com/menzi11/BullshitGenerator
-    > [./src/plugins/bullshit_gen/LICENSE](./src/plugins/bullshit_gen/LICENSE)
-
-- https://github.com/RMYHY/RBot
-    > [./src/plugins/asoul_illness/LICENSE](./src/plugins/asoul_illness/LICENSE)
-
-- https://github.com/Kyomotoi/AnimeThesaurus
-    > [./src/data/wordlib/LICENSE-MIT](./src/data/wordlib/LICENSE-MIT)
+| 对应项目                                                     | 本项目中对应的 LICENSE                                       |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [Giftia/Project_Xiaoye](https://github.com/Giftia/Project_Xiaoye) | [./src/data/wordlib/LICENSE-GPL](./src/data/wordlib/LICENSE-GPL) |
+| [menzi11/BullshitGenerator](https://github.com/menzi11/BullshitGenerator) | [./src/plugins/bullshit_gen/LICENSE](./src/plugins/bullshit_gen/LICENSE) |
+| [RMYHY/RBot](https://github.com/RMYHY/RBot)                  | [./src/plugins/asoul_illness/LICENSE](./src/plugins/asoul_illness/LICENSE) |
+| [Kyomotoi/AnimeThesaurus](https://github.com/Kyomotoi/AnimeThesaurus) | [./src/data/wordlib/LICENSE-MIT](./src/data/wordlib/LICENSE-MIT) |
 
 > 衷心感谢你们为开源社区做出的贡献 ✨
