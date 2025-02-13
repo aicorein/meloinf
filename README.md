@@ -22,7 +22,7 @@
 
 目前暂时支持通过 onebot v11 协议提供服务，未来将会扩展为各平台的通用机器人。
 
-## 使用方法
+## 📦️ 配置使用
 
 1. clone 本项目
 
@@ -45,13 +45,22 @@ cd src
 python -m melobot run main.py
 ```
 
-## 📜 版权说明
+## 📜 开源许可
 
-本项目借鉴并修改了来自以下项目的代码、数据文件：
+本项目在 `AGPL3` 协议下开源发行。
+
+此外，本项目借鉴或修改了来自以下项目的代码、数据文件。所有原始的 LICENSE 文件已保留，本项目的许可证也与以下项目兼容。
 
 - https://github.com/Giftia/Project_Xiaoye
-- https://github.com/menzi11/BullshitGenerator
-- https://github.com/RMYHY/RBot
-- https://github.com/Kyomotoi/AnimeThesaurus
+    > [./src/data/wordlib/LICENSE-GPL](./src/data/wordlib/LICENSE-GPL)
 
-所有原始的 LICENSE 文件已保留（于本项目子目录中），本项目的许可证也与以上项目的许可证兼容。
+- https://github.com/menzi11/BullshitGenerator
+    > [./src/plugins/bullshit_gen/LICENSE](./src/plugins/bullshit_gen/LICENSE)
+
+- https://github.com/RMYHY/RBot
+    > [./src/plugins/asoul_illness/LICENSE](./src/plugins/asoul_illness/LICENSE)
+
+- https://github.com/Kyomotoi/AnimeThesaurus
+    > [./src/data/wordlib/LICENSE-MIT](./src/data/wordlib/LICENSE-MIT)
+
+> 衷心感谢你们为开源社区做出的贡献 ✨
