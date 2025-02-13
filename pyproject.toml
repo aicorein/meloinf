@@ -7,14 +7,14 @@ authors = [
 ]
 dependencies = [
     "melobot>=3.1.1",
-    "melobot[onebot]",
-    "melobot[cli]",
+    "melobot[onebot]>=3.1.1",
+    "melobot[cli]>=3.1.1",
     "uvloop>=0.21.0; sys_platform != 'win32'",
     "pillow>=11.0.0",
     "psutil>=6.1.1",
     "matplotlib>=3.10.0",
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 readme = "README.md"
 license = {text = "AGPL3"}
 
@@ -39,6 +39,10 @@ line-length = 100
 [tool.isort]  
 profile = "black"
 line_length = 100
+
+[tool.pdm.scripts]
+_deps_export = {call = "scripts.exports:main"}
+post_install.composite = ["_deps_export"]
 
 
 [dependency-groups]
