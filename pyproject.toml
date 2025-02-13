@@ -6,7 +6,7 @@ authors = [
     {name = "aicorein", email = "aicorein@meloland.org"},
 ]
 dependencies = [
-    "melobot>=3.1.0",
+    "melobot>=3.1.1",
     "melobot[onebot]",
     "melobot[cli]",
     "uvloop>=0.21.0; sys_platform != 'win32'",
@@ -39,9 +39,6 @@ line-length = 100
 [tool.isort]  
 profile = "black"
 line_length = 100
-
-[tool.pdm]
-distribution = true
 
 
 [dependency-groups]

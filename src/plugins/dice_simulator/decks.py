@@ -33,7 +33,7 @@ def _convert_r_exp(string: str) -> str:
 def r_gen(string: str) -> str:
     try:
         exp = _convert_r_exp(string)
-        return str(eval(exp))  # pylint: disable=eval-used
+        return str(eval(exp))
 
     except Exception as e:
         return f"掷骰表达式无法解析：\n[{e.__class__.__name__}] {e}"

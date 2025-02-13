@@ -44,7 +44,7 @@ class Store:
         today = datetime.datetime(cur_t.year, cur_t.month, cur_t.day)
         if (
             Store.news_cache is None
-            or today != Store.news_cache[0]  # pylint: disable=unsubscriptable-object
+            or today != Store.news_cache[0]
         ):
             data = await get_news_image()
             if data is None:
@@ -56,7 +56,7 @@ class Store:
     @classmethod
     async def get_news_cache(cls, logger: GenericLogger) -> str:
         await Store.fresh_news_cache(logger)
-        return Store.news_cache[1]  # pylint: disable=unsubscriptable-object
+        return Store.news_cache[1]
 
 
 @EveryDayNews.on(PluginLifeSpan.INITED)

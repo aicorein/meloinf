@@ -39,13 +39,13 @@ async def title_manager(
                 )
 
         case "enable" | "启用" | "开启":
-            await owner_check()  # pylint: disable=no-value-for-parameter
+            await owner_check()
             async with Store.flag_rw.write():
                 Store.flag = True
                 return await send_text("群头衔相关功能已启用 ✅")
 
         case "disable" | "禁用" | "关闭" | "禁用":
-            await owner_check()  # pylint: disable=no-value-for-parameter
+            await owner_check()
             async with Store.flag_rw.write():
                 Store.flag = False
                 return await send_text("群头衔相关功能已禁用 ✅")

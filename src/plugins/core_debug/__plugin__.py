@@ -106,8 +106,8 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
                         await send_text("已退出修改操作")
                         continue
 
-                    exec(f"{pointer}={text}", var_map)  # pylint: disable=exec-used
-                    val = eval(f"{pointer}", var_map)  # pylint: disable=eval-used
+                    exec(f"{pointer}={text}", var_map)
+                    val = eval(f"{pointer}", var_map)
                     await format_send(
                         send_text, f"修改后的值为：{val}\n" f"类型：{type(val)}"
                     )
@@ -118,7 +118,7 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
             case _:
                 try:
                     text = ev.text
-                    val = eval(f"{text}", var_map)  # pylint: disable=eval-used
+                    val = eval(f"{text}", var_map)
                     pointer = text
                     await format_send(adapter.send_reply, str(val))
 

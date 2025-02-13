@@ -14,7 +14,7 @@ from ...platform.onebot import get_owner_checker
 
 class Store:
     cwd = str(Path(__file__).parent.resolve())
-    shell: asyncio.subprocess.Process  # pylint: disable=no-member
+    shell: asyncio.subprocess.Process
     executable = "powershell" if sys.platform == "win32" else "sh"
     encoding = "utf-8" if sys.platform != "win32" else "gbk"
     line_sep = os.linesep
@@ -28,9 +28,7 @@ class Store:
     _cache_time = 0.3
 
     shell_checker = get_owner_checker(
-        fail_cb=lambda: get_bot()
-        .get_adapter(Adapter)
-        .send_reply("你无权使用【命令行】功能")
+        fail_cb=lambda: get_bot().get_adapter(Adapter).send_reply("你无权使用【命令行】功能")
     )
     shell_cmd_paser = PARSER_FACTORY.get(
         targets="shell",
