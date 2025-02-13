@@ -6,14 +6,16 @@ if sys.platform != "win32":
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-sys.path.insert(0, r"E:/projects/Python/git-proj/melobot/src")
 from melobot import Bot
-from melobot.log import Logger, LogLevel
+from melobot.log import Logger
 from melobot.protocols.onebot.v11 import OneBotV11Protocol
 
-from env import get_onebot_io
+from env import ENVS, get_onebot_io
 
-bot = Bot("meloinf", logger=Logger("meloinf", level=LogLevel.DEBUG))
+bot = Bot(
+    ENVS.bot.bot_name,
+    logger=Logger(ENVS.bot.bot_name, level=ENVS.bot.log_level, to_dir="../logs"),
+)
 bot.add_protocol(OneBotV11Protocol(get_onebot_io()))
 bot.load_plugins_dir("plugins", load_depth=3)
 bot.run()

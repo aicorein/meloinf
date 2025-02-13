@@ -1,11 +1,8 @@
 import pathlib
 import tomllib
 
-from melobot.protocols.onebot.v11 import (
-    BaseIOSource,
-    ForwardWebSocketIO,
-    ReverseWebSocketIO,
-)
+from melobot.log import LogLevel
+from melobot.protocols.onebot.v11 import BaseIOSource, ForwardWebSocketIO, ReverseWebSocketIO
 
 dir_path = pathlib.Path(__file__).parent
 env_path = dir_path.joinpath("env.toml")
@@ -23,11 +20,29 @@ def to_abs_path(path: str) -> str:
     return str(dir_path.joinpath(_path).resolve(True))
 
 
+def str_to_log_lvl(lvl: str) -> LogLevel:
+    lvl = lvl.upper()
+    match lvl:
+        case "DEBUG":
+            return LogLevel.DEBUG
+        case "INFO":
+            return LogLevel.INFO
+        case "WARNING":
+            return LogLevel.WARNING
+        case "ERROR":
+            return LogLevel.ERROR
+        case "CRITICAL":
+            return LogLevel.CRITICAL
+        case _:
+            return LogLevel.INFO
+
+
 class BotEnvs:
     def __init__(self) -> None:
         self.proj_name: str = BOT_CONFIG["bot_proj_name"]
         self.proj_ver: str = BOT_CONFIG["bot_proj_ver"]
         self.proj_src: str = BOT_CONFIG["bot_proj_src"]
+        self.log_level: LogLevel = str_to_log_lvl(BOT_CONFIG["log_level"])
         self.bot_name: str = BOT_CONFIG["bot_name"]
         self.bot_nicknames: list[str] = BOT_CONFIG["bot_nickname"]
         self.uni_cmd_start: str | list[str] = BOT_CONFIG["uni_cmd_start"]
@@ -74,12 +89,8 @@ def get_onebot_io() -> BaseIOSource:
     envs = ENVS.onebot
     access_token = envs.access_token if envs.access_token != "" else None
     if envs.reverse_host != "" and envs.reverse_port != "":
-        return ReverseWebSocketIO(
-            envs.reverse_host, envs.reverse_port, access_token=access_token
-        )
+        return ReverseWebSocketIO(envs.reverse_host, envs.reverse_port, access_token=access_token)
     elif envs.forward_ws != "":
         return ForwardWebSocketIO(envs.forward_ws, access_token=access_token)
     else:
-        raise ValueError(
-            "env.toml 配置有误，forward 和 reverse 通信方式的配置不能同时为空"
-        )
+        raise ValueError("env.toml 配置有误，forward 和 reverse 通信方式的配置不能同时为空")
