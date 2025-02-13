@@ -11,6 +11,7 @@ API_URLS = [
     "http://img.xjh.me/random_img.php?return=302",
     "https://www.loliapi.com/acg/",
     "http://api.anosu.top/img/",
+    "https://iw233.cn/api.php?sort=cdniw",
 ]
 
 # + [f"https://api.r10086.com/樱道随机图片api接口.php?图片系列=动漫综合{i}" for i in range(1, 18)]
