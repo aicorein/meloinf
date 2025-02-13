@@ -1,6 +1,12 @@
 import pathlib
 import tomllib
 
+from melobot.protocols.onebot.v11 import (
+    BaseIOSource,
+    ForwardWebSocketIO,
+    ReverseWebSocketIO,
+)
+
 dir_path = pathlib.Path(__file__).parent
 env_path = dir_path.joinpath("env.toml")
 with open(env_path, mode="rb") as fp:
@@ -38,13 +44,14 @@ class BotEnvs:
         self.baidu_translate_key: str = BOT_CONFIG["baidu_translate_key"]
         self.hash_salt: str = BOT_CONFIG["hash_salt"]
         self.news_time: str = BOT_CONFIG["everyday_news_time"]
-        self.moonshot_key: str = BOT_CONFIG["moonshot_key"]
 
 
 class OneBotEnvs:
     def __init__(self) -> None:
         self.access_token: str = ONEBOT_CONFIG["access_token"]
         self.forward_ws: str = ONEBOT_CONFIG["forward_ws"]
+        self.reverse_host: str = ONEBOT_CONFIG["reverse_host"]
+        self.reverse_port: int = ONEBOT_CONFIG["reverse_port"]
         self.owner_id: int = ONEBOT_CONFIG["owner_id"]
         self.owner_names: list[str] = ONEBOT_CONFIG["owner_names"]
         self.super_users: list[int] = ONEBOT_CONFIG["super_users"]
@@ -61,3 +68,18 @@ class Envs:
 
 
 ENVS = Envs()
+
+
+def get_onebot_io() -> BaseIOSource:
+    envs = ENVS.onebot
+    access_token = envs.access_token if envs.access_token != "" else None
+    if envs.reverse_host != "" and envs.reverse_port != "":
+        return ReverseWebSocketIO(
+            envs.reverse_host, envs.reverse_port, access_token=access_token
+        )
+    elif envs.forward_ws != "":
+        return ForwardWebSocketIO(envs.forward_ws, access_token=access_token)
+    else:
+        raise ValueError(
+            "env.toml 配置有误，forward 和 reverse 通信方式的配置不能同时为空"
+        )
