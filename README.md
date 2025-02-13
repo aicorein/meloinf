@@ -52,5 +52,6 @@ python -m melobot run main.py
 - https://github.com/Giftia/Project_Xiaoye
 - https://github.com/menzi11/BullshitGenerator
 - https://github.com/RMYHY/RBot
+- https://github.com/Kyomotoi/AnimeThesaurus
 
-所有原始协议 LICENSE 文件已被保留，本项目的许可证也与以上项目的许可证兼容。
+所有原始的 LICENSE 文件已保留（于本项目子目录中），本项目的许可证也与以上项目的许可证兼容。

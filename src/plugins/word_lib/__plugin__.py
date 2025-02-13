@@ -13,7 +13,7 @@ from ...platform.onebot import CmdArgFmtter as Fmtter
 from ...platform.onebot import get_white_checker
 from ...utils import ENG_PUNC, HANS_PUNC, remove_punctuation
 from .. import base_utils as BASE_INFO
-from .wdict import BOT_FLAG, OWNER_FLAG, SENDER_FLAG, WORD_DICT, add_pair
+from .wdict import BOT_FLAG, OWNER_FLAG, SENDER_FLAG, WORDS_DICT, add_pair
 
 bot = get_bot()
 OB_ADAPTER = bot.get_adapter(Adapter)
@@ -74,7 +74,12 @@ async def make_reply(event: MessageEvent) -> None:
 @WordLib.use
 @on_message(checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(["wlib-info", "词库信息"]))
 async def get_wlib_info() -> None:
-    await send_text(f"● 当前加载词库文件：words.txt\n● 词条数：{len(WORD_DICT)}")
+    ans_num = sum(map(len, WORDS_DICT.values()))
+    await send_text(
+        f"● 模式：O(1) 内存读取应答\n"
+        f"● 触发词条数：{len(WORDS_DICT)}\n"
+        f"● 应答词条数：{ans_num}"
+    )
 
 
 @WordLib.use
@@ -84,9 +89,7 @@ async def get_wlib_info() -> None:
     decos=[
         if_not(lambda: TEACH_CHECKER.check(get_event()), reject=stop),
         lock(
-            lambda: OB_ADAPTER.send_reply(
-                f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~"
-            )
+            lambda: OB_ADAPTER.send_reply(f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~")
         ),
     ],
 )
@@ -105,7 +108,7 @@ async def wlib_teach(adapter: Adapter, args: CmdArgs) -> None:
 def get_random_reply(event: MessageEvent, keys: list[str]) -> str:
     res: list[str] = []
     for k in keys:
-        v = WORD_DICT.get(k)
+        v = WORDS_DICT.get(k)
         if v:
             res.extend(v)
     output = choice(res) if len(res) > 0 else ""
@@ -118,9 +121,7 @@ def get_random_reply(event: MessageEvent, keys: list[str]) -> str:
             sender_name = event.sender.nickname
         else:
             sender_name = (
-                event.sender.card
-                if event.sender.card not in ("", None)
-                else event.sender.nickname
+                event.sender.card if event.sender.card not in ("", None) else event.sender.nickname
             )
         output = output.replace(SENDER_FLAG, sender_name)
 

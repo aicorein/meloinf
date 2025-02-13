@@ -47,7 +47,7 @@ class BotEnvs:
         self.bot_nicknames: list[str] = BOT_CONFIG["bot_nickname"]
         self.uni_cmd_start: str | list[str] = BOT_CONFIG["uni_cmd_start"]
         self.uni_cmd_sep: str | list[str] = BOT_CONFIG["uni_cmd_sep"]
-        self.word_lib: str = to_abs_path(BOT_CONFIG["word_lib"])
+        self.word_lib: list[str] = list(map(to_abs_path, BOT_CONFIG["word_lib"]))
         self.http_proxy: str = BOT_CONFIG["http_proxy"]
         self.figure_font: str = to_abs_path(BOT_CONFIG["figure_font"])
         self.weather_key: str = BOT_CONFIG["weather_key"]
