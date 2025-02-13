@@ -34,7 +34,7 @@ def wrap_s(s: str, wrap_len: int) -> list[str]:
 
 def txt2img(
     s: str,
-    wrap_len: int = 70,
+    wrap_len: int = 100,
     font_size: int = 18,
     bg_color: str = "white",
     color: str = "black",
