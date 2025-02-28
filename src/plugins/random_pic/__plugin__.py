@@ -29,7 +29,7 @@ RandomPic = PluginPlanner("1.2.0")
             lambda t: send_text(f"随机图功能冷却中，剩余：{t:.2f}s"),
             interval=5,
         ),
-        timelimit(lambda: send_text("随机图获取超时，请稍候再试..."), timeout=15),
+        timelimit(lambda: send_text("随机图获取超时，请稍候再试..."), timeout=60),
     ],
 )
 async def random_picture(adapter: Adapter, logger: GenericLogger) -> None:

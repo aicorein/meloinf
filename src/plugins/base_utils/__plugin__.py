@@ -100,7 +100,7 @@ async def get_onebot_app_info(adapter: Adapter, logger: GenericLogger) -> None:
 @on_message(parser=PARSER_FACTORY.get(targets=["info", "信息"]), checker=COMMON_CHECKER)
 async def reply_info() -> None:
     output = Store.bot_info.format(
-        ENVS.bot.bot_nicknames[0],
+        ENVS.bot.bot_name,
         MetaInfo.name,
         MetaInfo.ver,
         ENVS.bot.proj_name,
@@ -109,17 +109,15 @@ async def reply_info() -> None:
         platform.python_version(),
         platform.system(),
         f'[{", ".join(a.protocol for a in bot.get_adapters(lambda _: True))}]',
-        f'[{", ".join(bot.get_plugins())}]',
+        f"{len(bot.get_plugins())}",
     )
-    await send_text(output)
-
-    output = Store.onebot_info_str.format(
+    output2 = Store.onebot_info_str.format(
         Store.onebot_app_name,
         Store.onebot_app_ver,
         Store.onebot_protocol_ver,
         Store.onebot_other_infos,
     )
-    await send_text(output)
+    await send_text("\n\n".join((output, output2)))
 
 
 @BaseUtils.use
@@ -193,9 +191,7 @@ RESTART_FLAG_PATH = str(Path(__file__).parent.joinpath(RESTART_FLAG_NAME).resolv
 async def restart_bot(event: MessageEvent) -> None:
     if CLI_RUNTIME not in os.environ:
         await send_text(
-            "重启失败\n"
-            "启用重启功能，需要用以下方式运行：\n"
-            "python -m melobot run ..."
+            "重启失败\n" "启用重启功能，需要用以下方式运行：\n" "python -m melobot run ..."
         )
         return
 

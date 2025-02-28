@@ -1,6 +1,6 @@
 [project]
 name = "meloinf"
-version = "0.1.0"
+version = "1.2.0"
 description = "A cross platform bot base on melobot."
 authors = [
     {name = "aicorein", email = "aicorein@meloland.org"},
