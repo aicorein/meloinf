@@ -2,6 +2,7 @@ import asyncio
 import datetime
 
 from melobot import GenericLogger, PluginPlanner, get_bot, send_text
+from melobot.bot import bot
 from melobot.exceptions import BotException
 from melobot.plugin import PluginLifeSpan
 from melobot.protocols.onebot.v11 import Adapter, ImageSendSegment, on_message
@@ -12,8 +13,6 @@ from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...utils import async_http, base64_encode, get_headers
 
 EveryDayNews = PluginPlanner("1.0.0")
-
-bot = get_bot()
 
 NEWS_API = "https://api.03c3.cn/api/zb?type=img"
 NEWS_TIME = tuple(map(int, ENVS.bot.news_time.split(":")))
@@ -42,10 +41,7 @@ class Store:
     async def fresh_news_cache(cls, logger: GenericLogger) -> None:
         cur_t = datetime.datetime.now()
         today = datetime.datetime(cur_t.year, cur_t.month, cur_t.day)
-        if (
-            Store.news_cache is None
-            or today != Store.news_cache[0]
-        ):
+        if Store.news_cache is None or today != Store.news_cache[0]:
             data = await get_news_image()
             if data is None:
                 logger.warning("每日新闻图片缓存异常，获取的图片为空")
@@ -96,9 +92,7 @@ async def news_arrange(adapter: Adapter, logger: GenericLogger) -> None:
 
 
 @EveryDayNews.use
-@on_message(
-    checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["news", "每日新闻"])
-)
+@on_message(checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["news", "每日新闻"]))
 async def manual_news(logger: GenericLogger) -> None:
     data = await Store.get_news_cache(logger)
     await send_text(ImageSendSegment(file=data))

@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from melobot import GenericLogger, PluginPlanner, get_bot, send_text
+from melobot import GenericLogger, PluginPlanner, send_text
+from melobot.bot import bot
 from melobot.di import Reflect
 from melobot.handle import get_event, stop
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
-from melobot.session import SessionStore, enter_session, get_session_store, suspend
-from melobot.utils import if_not, unfold_ctx
+from melobot.session import SessionStore, get_session_store, suspend
+from melobot.utils import if_not
 from melobot.utils.parse import CmdArgs
 
 from ...platform.onebot import COMMON_CHECKER
@@ -13,9 +14,6 @@ from .store import Store
 from .utils import close_ishell, ishell_run, open_ishell, shell_run
 
 Shell = PluginPlanner(version="1.3.0")
-
-
-bot = get_bot()
 
 
 @bot.on_started

@@ -1,7 +1,8 @@
 import re
 from random import choice, random
 
-from melobot import PluginPlanner, get_bot, send_text
+from melobot import PluginPlanner, send_text
+from melobot.bot import bot
 from melobot.handle import get_event, stop
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
 from melobot.utils import if_not, lock
@@ -15,7 +16,6 @@ from ...utils import ENG_PUNC, HANS_PUNC, remove_punctuation
 from .. import base_utils as BASE_INFO
 from .wdict import BOT_FLAG, OWNER_FLAG, SENDER_FLAG, WORDS_DICT, add_pair
 
-bot = get_bot()
 OB_ADAPTER = bot.get_adapter(Adapter)
 assert isinstance(OB_ADAPTER, Adapter)
 

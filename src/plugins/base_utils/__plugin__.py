@@ -5,9 +5,9 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from melobot import GenericLogger, MetaInfo, PluginPlanner, get_bot, send_text
+from melobot import GenericLogger, MetaInfo, PluginPlanner, send_text
 from melobot.adapter import AdapterLifeSpan
-from melobot.bot import CLI_RUNTIME
+from melobot.bot import CLI_RUNTIME, bot
 from melobot.protocols.onebot.v11 import (
     Adapter,
     EchoRequireCtx,
@@ -54,7 +54,6 @@ BaseUtils = PluginPlanner(
 )
 
 
-bot = get_bot()
 ob_adapter: Adapter = bot.get_adapter(Adapter)
 
 
