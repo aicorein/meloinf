@@ -74,7 +74,7 @@ async def watch_output(stream: aio.StreamReader) -> None:
                     Store._buf.append((time.perf_counter(), output))
 
             except Exception as e:
-                get_bot().logger.warning(f"ShellPlugin 输出转发遇到问题，警告：{e}")
+                get_bot().logger.exception(f"ShellPlugin 输出转发遇到问题，警告：{e}")
     except aio.CancelledError:
         pass
     except KeyboardInterrupt:
@@ -84,30 +84,32 @@ async def watch_output(stream: aio.StreamReader) -> None:
 async def watch_buf(adapter: Adapter) -> None:
     try:
         while True:
-            if len(Store._buf) == 0:
-                pass
-            elif abs(Store._buf[-1][0] - time.perf_counter()) <= Store._cache_time:
-                pass
-            else:
-                s = "\n".join([t[1] for t in Store._buf])
+            try:
+                if len(Store._buf) == 0:
+                    pass
+                elif abs(Store._buf[-1][0] - time.perf_counter()) <= Store._cache_time:
+                    pass
+                else:
+                    s = "\n".join([t[1] for t in Store._buf])
+                    Store._buf.clear()
+                    if s == "":
+                        continue
+                    if Store.pointer:
+                        p = Store.pointer
+                        msg: str | Segment
+                        if len(s) > 200:
+                            data = base_utils.txt2img(s)
+                            b64_data = base64_encode(data)
+                            msg = ImageSendSegment(file=b64_data)
+                        else:
+                            msg = s
+                        await adapter.send_custom(msg, p[0], p[1])
+                await aio.sleep(0.2)
+            except Exception as e:
                 Store._buf.clear()
-                if s == "":
-                    continue
-                if Store.pointer:
-                    p = Store.pointer
-                    msg: str | Segment
-                    if len(s) > 200:
-                        data = base_utils.txt2img(s)
-                        b64_data = base64_encode(data)
-                        msg = ImageSendSegment(file=b64_data)
-                    else:
-                        msg = s
-                    await adapter.send_custom(msg, p[0], p[1])
-            await aio.sleep(0.2)
+                get_bot().logger.exception(f"ShellPlugin 缓存异常，错误：{e}")
     except aio.CancelledError:
         pass
-    except Exception as e:
-        get_bot().logger.error(f"ShellPlugin 缓存异常，错误：{e}")
 
 
 def send_to_shell(s: str) -> None:

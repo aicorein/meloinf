@@ -33,8 +33,8 @@ async def close_shell_service(logger: GenericLogger) -> None:
 @Shell.use
 @on_message(
     checker=COMMON_CHECKER,
+    legacy_session=True,
     decos=[
-        unfold_ctx(lambda: enter_session(Store.shell_session_rule)),
         if_not(
             lambda: Store.shell_cmd_paser.parse(get_event().text),
             reject=stop,
@@ -43,9 +43,7 @@ async def close_shell_service(logger: GenericLogger) -> None:
         if_not(lambda: Store.shell_checker.check(get_event()), reject=stop),
     ],
 )
-async def run_in_shell(
-    store: SessionStore, event: Annotated[MessageEvent, Reflect()]
-) -> None:
+async def run_in_shell(store: SessionStore, event: Annotated[MessageEvent, Reflect()]) -> None:
     args: CmdArgs = store["args"]
     cmd = args.vals[0]
     if cmd is None:

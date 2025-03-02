@@ -4,8 +4,7 @@ import sys
 from pathlib import Path
 
 from melobot import get_bot
-from melobot.protocols.onebot.v11 import Adapter, MessageEvent
-from melobot.session import Rule
+from melobot.protocols.onebot.v11 import Adapter
 
 from ...platform.onebot import PARSER_FACTORY
 from ...platform.onebot import CmdArgFmtter as Fmtter
@@ -34,4 +33,3 @@ class Store:
         targets="shell",
         formatters=[Fmtter(src_desc="命令内容", src_expect="字符串", default=None)],
     )
-    shell_session_rule = Rule[MessageEvent].new(lambda e1, e2: e1.user_id == e2.user_id)
