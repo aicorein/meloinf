@@ -88,6 +88,7 @@ async def send_with_forward(
     checker=COMMON_CHECKER,
     legacy_session=True,
     decos=[
+        if_not(lambda: COMPILE_CMD_PARSER.parse(get_event().text), reject=stop),
         lock(lambda: send_text("其他人正在调用 【代码运行】功能，稍后再试...")),
     ],
 )
@@ -129,8 +130,8 @@ async def compile_code(
     checker=COMMON_CHECKER,
     legacy_session=True,
     decos=[
-        lock(lambda: send_text("其他人正在调用【计算】功能，稍后再试...")),
         if_not(lambda: CALC_CMD_PARSER.parse(get_event().text), reject=stop),
+        lock(lambda: send_text("其他人正在调用【计算】功能，稍后再试...")),
     ],
 )
 async def calc(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
