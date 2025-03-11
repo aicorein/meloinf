@@ -74,7 +74,7 @@ async def watch_output(stream: aio.StreamReader) -> None:
                     Store._buf.append((time.perf_counter(), output))
 
             except Exception as e:
-                get_bot().logger.exception(f"ShellPlugin 输出转发遇到问题，警告：{e}")
+                get_bot().logger.exception(f"ShellPlugin 输出转发遇到问题")
     except aio.CancelledError:
         pass
     except KeyboardInterrupt:
@@ -107,7 +107,7 @@ async def watch_buf(adapter: Adapter) -> None:
                 await aio.sleep(0.2)
             except Exception as e:
                 Store._buf.clear()
-                get_bot().logger.exception(f"ShellPlugin 缓存异常，错误：{e}")
+                get_bot().logger.exception(f"ShellPlugin 缓存异常")
     except aio.CancelledError:
         pass
 

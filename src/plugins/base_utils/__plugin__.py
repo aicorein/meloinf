@@ -7,7 +7,7 @@ from pathlib import Path
 
 from melobot import GenericLogger, MetaInfo, PluginPlanner, send_text
 from melobot.adapter import AdapterLifeSpan
-from melobot.bot import CLI_RUNTIME, bot
+from melobot.bot import CLI_RUNTIME, BotLifeSpan, bot
 from melobot.protocols.onebot.v11 import (
     Adapter,
     EchoRequireCtx,
@@ -214,7 +214,7 @@ async def restart_tip(adapter: Adapter) -> None:
         with open(RESTART_FLAG_PATH, "rb") as fp:
             info: RestartInfo = pickle.load(fp)
 
-        interval = time.time_ns() / 1e9 - info.time
+        interval = bot._hook_bus.get_evoke_time(BotLifeSpan.STARTED) - info.time
         text = f"重启完成，耗时 {interval:.3f} s"
         await adapter.send_custom(text, info.uid, info.gid)
     finally:
