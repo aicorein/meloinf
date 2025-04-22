@@ -9,16 +9,14 @@ from melobot.protocols.onebot.v11 import Adapter, ImageSegment, MessageEvent, on
 from melobot.session import suspend
 from melobot.utils import if_not
 
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker
 from ...utils import base64_encode
 from .. import base_utils
 
 
 class Store:
     checker = get_owner_checker(
-        fail_cb=lambda: get_bot()
-        .get_adapter(Adapter)
-        .send_reply("你无权使用【核心调试】功能")
+        fail_cb=lambda: get_bot().get_adapter(Adapter).send_reply("你无权使用【核心调试】功能")
     )
     parser = PARSER_FACTORY.get(["核心调试", "core-dbg"])
 
@@ -47,9 +45,7 @@ async def format_send(send_func: Callable, s: str) -> None:
     ],
 )
 async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> None:
-    await send_text(
-        "【你已进入核心调试状态】\n" + "注意 ⚠️：错误操作可能导致崩溃，请谨慎操作！"
-    )
+    await send_text("【你已进入核心调试状态】\n" + "注意 ⚠️：错误操作可能导致崩溃，请谨慎操作！")
     await send_text(
         "【输入求值表达式以查看值】\n"
         "例：bot.name\n"
@@ -94,9 +90,7 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
                     continue
 
                 await send_text(
-                    "【输入修改后的值：】\n"
-                    "$e$ 退出修改操作\n"
-                    f"当前指向对象：{pointer}"
+                    "【输入修改后的值：】\n" "$e$ 退出修改操作\n" f"当前指向对象：{pointer}"
                 )
                 await suspend()
 
@@ -108,9 +102,7 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
 
                     exec(f"{pointer}={text}", var_map)
                     val = eval(f"{pointer}", var_map)
-                    await format_send(
-                        send_text, f"修改后的值为：{val}\n" f"类型：{type(val)}"
-                    )
+                    await format_send(send_text, f"修改后的值为：{val}\n" f"类型：{type(val)}")
 
                 except Exception as e:
                     await send_text(f"尝试修改值并重新显示时发生异常 ❌：{str(e)}")

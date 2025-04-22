@@ -2,9 +2,9 @@ from melobot import PluginPlanner, send_text
 from melobot.protocols.onebot.v11 import on_message
 from melobot.utils.parse import CmdArgs
 
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 
-Echo = PluginPlanner("1.0.0")
+Echo = PluginPlanner("1.0.0", auto_import=True)
 
 
 @Echo.use

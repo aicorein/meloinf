@@ -3,9 +3,10 @@ import subprocess
 import time
 
 import psutil
-from melobot import get_bot, send_text
+from melobot import send_text
 from melobot.exceptions import BotException
 from melobot.handle import stop
+from melobot.log import logger
 from melobot.protocols.onebot.v11 import Adapter, ImageSendSegment, Segment
 
 from ...utils import base64_encode
@@ -37,11 +38,7 @@ async def open_ishell(adapter: Adapter) -> None:
         stderr=subprocess.PIPE,
         cwd=Store.cwd,
     )
-    if (
-        Store.shell.stdout is None
-        or Store.shell.stderr is None
-        or Store.shell.stdin is None
-    ):
+    if Store.shell.stdout is None or Store.shell.stderr is None or Store.shell.stdin is None:
         raise ShellPluginException("ShellPlugin 进程输入输出异常")
     Store.stdin = Store.shell.stdin
     Store.stdout = Store.shell.stdout
@@ -51,14 +48,16 @@ async def open_ishell(adapter: Adapter) -> None:
         aio.create_task(watch_output(Store.stderr)),
         aio.create_task(watch_buf(adapter)),
     ]
+    Store.started = True
 
 
 async def close_ishell() -> None:
-    for t in Store.tasks:
-        t.cancel()
-    if Store.shell.returncode is None:
-        Store.shell.terminate()
-        await Store.shell.wait()
+    if Store.started:
+        for t in Store.tasks:
+            t.cancel()
+        if Store.shell.returncode is None:
+            Store.shell.terminate()
+            await Store.shell.wait()
 
 
 async def watch_output(stream: aio.StreamReader) -> None:
@@ -74,7 +73,7 @@ async def watch_output(stream: aio.StreamReader) -> None:
                     Store._buf.append((time.perf_counter(), output))
 
             except Exception as e:
-                get_bot().logger.exception(f"ShellPlugin 输出转发遇到问题")
+                logger.exception("ShellPlugin 输出转发遇到问题")
     except aio.CancelledError:
         pass
     except KeyboardInterrupt:
@@ -107,7 +106,7 @@ async def watch_buf(adapter: Adapter) -> None:
                 await aio.sleep(0.2)
             except Exception as e:
                 Store._buf.clear()
-                get_bot().logger.exception(f"ShellPlugin 缓存异常")
+                logger.exception("ShellPlugin 缓存异常")
     except aio.CancelledError:
         pass
 

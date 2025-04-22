@@ -1,15 +1,16 @@
 from typing import Annotated
 
-from melobot import GenericLogger, PluginPlanner, send_text
+from melobot import PluginPlanner, send_text
 from melobot.bot import bot
 from melobot.di import Reflect
 from melobot.handle import get_event, stop
+from melobot.log import logger
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
 from melobot.session import SessionStore, get_session_store, suspend
 from melobot.utils import if_not
 from melobot.utils.parse import CmdArgs
 
-from ...platform.onebot import COMMON_CHECKER
+from ...domain.onebot import COMMON_CHECKER
 from .store import Store
 from .utils import close_ishell, ishell_run, open_ishell, shell_run
 
@@ -17,13 +18,13 @@ Shell = PluginPlanner(version="1.3.0")
 
 
 @bot.on_started
-async def open_shell_service(adapter: Adapter, logger: GenericLogger) -> None:
+async def open_shell_service(adapter: Adapter) -> None:
     await open_ishell(adapter)
     logger.info("ShellPlugin 服务已开启")
 
 
 @bot.on_stopped
-async def close_shell_service(logger: GenericLogger) -> None:
+async def close_shell_service() -> None:
     await close_ishell()
     logger.info("ShellPlugin 服务已关闭")
 

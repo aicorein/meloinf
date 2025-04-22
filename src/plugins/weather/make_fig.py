@@ -3,27 +3,45 @@ import os
 from math import ceil, floor
 from pathlib import Path
 from random import choice
+from typing import TYPE_CHECKING
 
-import matplotlib as mpl
-import matplotlib.font_manager as fm
-import matplotlib.pyplot as plt
-from melobot.utils import get_id
-from PIL import Image
+from melobot import lazy_load
+from melobot.utils import get_id, singleton
 
 from ...env import ENVS
 from ...utils import base64_encode
 
-mpl.use("Agg")
-plt.ioff()
-fe = fm.FontEntry(fname=ENVS.bot.figure_font, name=ENVS.bot.figure_font.split("/")[-1])
-fm.fontManager.ttflist.insert(0, fe)
-mpl.rcParams["font.family"] = fe.name
-plt.rcParams["axes.unicode_minus"] = False
-CWD = str(Path(__file__).parent.resolve())
-BG_IMAGES: list[Image.Image] = []
-BG_DIR = os.path.join(CWD, "bgs")
-for filename in os.listdir(BG_DIR):
-    BG_IMAGES.append(Image.open(os.path.join(BG_DIR, filename)))
+if TYPE_CHECKING:
+    import matplotlib as mpl
+    import matplotlib.font_manager as fm
+    import PIL
+    from matplotlib import pyplot as plt
+else:
+    _g = globals()
+    lazy_load(_g, "matplotlib", alias="mpl")
+    lazy_load(_g, "matplotlib.font_manager", alias="fm")
+    lazy_load(_g, "PIL")
+    lazy_load(_g, "matplotlib", item="pyplot", alias="plt")
+
+
+CWD: str
+BG_DIR: str
+BG_IMAGES: list["PIL.Image.Image"] = []
+
+
+@singleton
+def mpl_pil_init() -> None:
+    global CWD, BG_IMAGES, BG_DIR
+    mpl.use("Agg")
+    plt.ioff()
+    fe = fm.FontEntry(fname=ENVS.bot.figure_font, name=ENVS.bot.figure_font.split("/")[-1])
+    fm.fontManager.ttflist.insert(0, fe)
+    mpl.rcParams["font.family"] = fe.name
+    plt.rcParams["axes.unicode_minus"] = False
+    CWD = str(Path(__file__).parent.resolve())
+    BG_DIR = os.path.join(CWD, "bgs")
+    for filename in os.listdir(BG_DIR):
+        BG_IMAGES.append(PIL.Image.open(os.path.join(BG_DIR, filename)))
 
 
 def get_ylim(base_v: int, steps: int, min_t: int, max_t: int) -> tuple[int, int]:
@@ -41,6 +59,7 @@ def get_ylim(base_v: int, steps: int, min_t: int, max_t: int) -> tuple[int, int]
 
 
 def gen_weather_fig(min_temps: list[int], max_temps: list[int]) -> str:
+    mpl_pil_init()
     data_len = len(min_temps)
     fig_id = get_id()
     min_t, max_t = min(min_temps), max(max_temps)
@@ -63,9 +82,9 @@ def gen_weather_fig(min_temps: list[int], max_temps: list[int]) -> str:
     fig.savefig(figio, dpi=150)
     fig.clf()
 
-    im1 = Image.open(figio)
+    im1 = PIL.Image.open(figio)
     im2 = choice(BG_IMAGES).convert("RGBA").crop((0, 0, 960, 750))
-    im3 = Image.blend(im2, im1, 0.82)
+    im3 = PIL.Image.blend(im2, im1, 0.82)
     im3.convert("RGB").save(imgio, format="JPEG", quality=95)
     fig_b64 = base64_encode(imgio.getvalue())
     return fig_b64

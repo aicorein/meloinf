@@ -1,15 +1,16 @@
 import asyncio
 import datetime
 
-from melobot import GenericLogger, PluginPlanner, get_bot, send_text
+from melobot import PluginPlanner, get_bot, send_text
 from melobot.bot import bot
 from melobot.exceptions import BotException
+from melobot.log import logger
 from melobot.plugin import PluginLifeSpan
 from melobot.protocols.onebot.v11 import Adapter, ImageSendSegment, on_message
 from melobot.utils import async_at
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...utils import async_http, base64_encode, get_headers
 
 EveryDayNews = PluginPlanner("1.0.0")
@@ -38,7 +39,7 @@ class Store:
     news_cache: tuple[datetime.datetime, str] | None = None
 
     @classmethod
-    async def fresh_news_cache(cls, logger: GenericLogger) -> None:
+    async def fresh_news_cache(cls) -> None:
         cur_t = datetime.datetime.now()
         today = datetime.datetime(cur_t.year, cur_t.month, cur_t.day)
         if Store.news_cache is None or today != Store.news_cache[0]:
@@ -50,18 +51,18 @@ class Store:
             logger.info("每日新闻图片缓存已更新")
 
     @classmethod
-    async def get_news_cache(cls, logger: GenericLogger) -> str:
-        await Store.fresh_news_cache(logger)
+    async def get_news_cache(cls) -> str:
+        await Store.fresh_news_cache()
         return Store.news_cache[1]
 
 
 @EveryDayNews.on(PluginLifeSpan.INITED)
-async def pinit(logger: GenericLogger) -> None:
-    await Store.fresh_news_cache(logger)
+async def pinit() -> None:
+    await Store.fresh_news_cache()
 
 
 @bot.on_started
-async def news_arrange(adapter: Adapter, logger: GenericLogger) -> None:
+async def news_arrange(adapter: Adapter) -> None:
     if len(NEWS_GROUP) == 0:
         return
 
@@ -75,7 +76,7 @@ async def news_arrange(adapter: Adapter, logger: GenericLogger) -> None:
             news_t += datetime.timedelta(days=1)
 
         async def timed_send_news() -> None:
-            data = await Store.get_news_cache(logger)
+            data = await Store.get_news_cache()
             for gid in NEWS_GROUP:
                 await adapter.send_custom(ImageSendSegment(file=data), group_id=gid)
 
@@ -93,6 +94,6 @@ async def news_arrange(adapter: Adapter, logger: GenericLogger) -> None:
 
 @EveryDayNews.use
 @on_message(checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["news", "每日新闻"]))
-async def manual_news(logger: GenericLogger) -> None:
-    data = await Store.get_news_cache(logger)
+async def manual_news() -> None:
+    data = await Store.get_news_cache()
     await send_text(ImageSendSegment(file=data))

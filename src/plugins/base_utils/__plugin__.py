@@ -5,22 +5,21 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from melobot import GenericLogger, MetaInfo, PluginPlanner, send_text
+from melobot import MetaInfo, PluginPlanner, send_text
 from melobot.adapter import AdapterLifeSpan
-from melobot.bot import CLI_RUNTIME, BotLifeSpan, bot
+from melobot.bot import BotLifeSpan, bot
+from melobot.log import logger
 from melobot.protocols.onebot.v11 import (
     Adapter,
-    EchoRequireCtx,
     GroupMessageEvent,
     GroupRole,
     LevelRole,
     MessageEvent,
     on_message,
 )
-from melobot.utils import unfold_ctx
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker, get_role
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker, get_role
 from .funcs import txt2img, wrap_s
 from .shares import (
     Store,
@@ -68,11 +67,10 @@ async def count_actions(*_, **__) -> None:
 
 
 @bot.on_started
-async def get_onebot_login_info(adapter: Adapter, logger: GenericLogger) -> None:
-    with EchoRequireCtx().unfold(True):
-        echo = await (await adapter.get_login_info())[0]
-    data = echo.data
+async def get_onebot_login_info(adapter: Adapter) -> None:
+    echo = await (await adapter.get_login_info()).unwrap(0)
     if echo.is_ok():
+        data = echo.result()
         Store.onebot_name = data["nickname"]
         Store.onebot_id = data["user_id"]
         logger.info("成功获得 OneBot 账号信息并存储")
@@ -81,11 +79,10 @@ async def get_onebot_login_info(adapter: Adapter, logger: GenericLogger) -> None
 
 
 @bot.on_started
-async def get_onebot_app_info(adapter: Adapter, logger: GenericLogger) -> None:
-    with EchoRequireCtx().unfold(True):
-        echo = await (await adapter.get_version_info())[0]
-    data = echo.data
+async def get_onebot_app_info(adapter: Adapter) -> None:
+    echo = await (await adapter.get_version_info()).unwrap(0)
     if echo.is_ok():
+        data = echo.result()
         Store.onebot_app_name = data.pop("app_name")
         Store.onebot_app_ver = data.pop("app_version")
         Store.onebot_protocol_ver = data.pop("protocol_version")
@@ -161,12 +158,10 @@ async def check_auth(adapter: Adapter, event: MessageEvent) -> None:
 
 @BaseUtils.use
 @on_message(
-    checker=get_owner_checker(),
-    parser=PARSER_FACTORY.get(targets=["stop", "close", "关机"]),
-    decos=[unfold_ctx(lambda: EchoRequireCtx().unfold(True))],
+    checker=get_owner_checker(), parser=PARSER_FACTORY.get(targets=["stop", "close", "关机"])
 )
 async def stop_bot() -> None:
-    await (await send_text("下班啦~"))[0]
+    await (await send_text("下班啦~"))
     await bot.close()
 
 
@@ -182,19 +177,15 @@ RESTART_FLAG_PATH = str(Path(__file__).parent.joinpath(RESTART_FLAG_NAME).resolv
 
 
 @BaseUtils.use
-@on_message(
-    checker=get_owner_checker(),
-    parser=PARSER_FACTORY.get(targets=["restart", "重启"]),
-    decos=[unfold_ctx(lambda: EchoRequireCtx().unfold(True))],
-)
+@on_message(checker=get_owner_checker(), parser=PARSER_FACTORY.get(targets=["restart", "重启"]))
 async def restart_bot(event: MessageEvent) -> None:
-    if CLI_RUNTIME not in os.environ:
+    if not bot.is_restartable():
         await send_text(
             "重启失败\n" "启用重启功能，需要用以下方式运行：\n" "python -m melobot run ..."
         )
         return
 
-    await (await send_text("正在重启中..."))[0]
+    await (await send_text("正在重启中..."))
     info = RestartInfo(
         event.user_id,
         event.group_id if isinstance(event, GroupMessageEvent) else None,

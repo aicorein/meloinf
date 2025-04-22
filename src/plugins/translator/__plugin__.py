@@ -1,16 +1,17 @@
 import hashlib
 from typing import Annotated
 
-from melobot import GenericLogger, PluginPlanner, send_text
+from melobot import PluginPlanner, send_text
 from melobot.di import Reflect
 from melobot.handle import get_event, stop
+from melobot.log import logger
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
 from melobot.session import SessionStore, get_session_store, suspend
 from melobot.utils import cooldown, if_not
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
 from ...utils import async_http, get_headers
 
 Translator = PluginPlanner("1.0.0")
@@ -59,7 +60,6 @@ TRANSLATE_CMD_PARSER = PARSER_FACTORY.get(
 )
 async def translate_text(
     adapter: Adapter,
-    logger: GenericLogger,
     store: SessionStore,
     event: Annotated[MessageEvent, Reflect()],
 ) -> None:

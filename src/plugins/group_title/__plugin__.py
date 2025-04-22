@@ -5,7 +5,7 @@ from melobot.protocols.onebot.v11 import Adapter, GroupMessageEvent, on_message
 from melobot.utils import RWContext
 from melobot.utils.parse import CmdArgs, CmdParser
 
-from ...platform.onebot import COMMON_CHECKER, get_owner_checker
+from ...domain.onebot import COMMON_CHECKER, get_owner_checker
 
 
 class Store:
@@ -19,9 +19,7 @@ GroupTitle = PluginPlanner("1.0.0")
 
 @GroupTitle.use
 @on_message(checker=COMMON_CHECKER, parser=CmdParser("!", "$", ["title", "头衔"]))
-async def title_manager(
-    adapter: Adapter, event: GroupMessageEvent, args: CmdArgs
-) -> None:
+async def title_manager(adapter: Adapter, event: GroupMessageEvent, args: CmdArgs) -> None:
     if len(args.vals) <= 0:
         return await send_text("不支持的群头衔功能指令")
 

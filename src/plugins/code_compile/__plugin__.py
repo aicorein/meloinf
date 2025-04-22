@@ -1,9 +1,10 @@
 from typing import Annotated
 from urllib.parse import quote
 
-from melobot import PluginPlanner, get_bot, send_text
+from melobot import PluginPlanner, send_text
 from melobot.di import Reflect
 from melobot.handle import get_event, stop
+from melobot.log import logger
 from melobot.protocols.onebot.v11 import (
     Adapter,
     MessageEvent,
@@ -14,9 +15,9 @@ from melobot.protocols.onebot.v11 import (
 from melobot.session import suspend
 from melobot.utils import if_not, lock, timelimit
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
 from ...utils import async_http, get_headers
 
 CodeCompile = PluginPlanner("1.3.0")
@@ -47,7 +48,7 @@ async def compile(code: str, lang_id: int, ext: str) -> tuple[str, Exception | N
 
     async with async_http(COMPILE_URL, "post", headers=REQ_HEADERS, data=data) as resp:
         if resp.status != 200:
-            get_bot().logger.error(f"远端编译请求失败，状态码：{resp.status}")
+            logger.error(f"远端编译请求失败，状态码：{resp.status}")
             return "远端编译请求失败...\n请稍后再试，或联系 bot 管理员解决", None
 
         try:
@@ -68,16 +69,12 @@ async def calc_exp(expression: str) -> tuple[str, Exception | None]:
     return await compile(code, 15, "py3")
 
 
-async def send_with_forward(
-    adapter: Adapter, sender_id: int, input: str, output: str
-) -> None:
+async def send_with_forward(adapter: Adapter, sender_id: int, input: str, output: str) -> None:
     output = output if len(output) <= 1000 else output[:1000] + "..."
     # print(output)
     await adapter.send_forward(
         [
-            NodeGocqCustomSegment(
-                sender_id, ENVS.bot.proj_name, [TextSegment(f"输入：\n{input}")]
-            ),
+            NodeGocqCustomSegment(sender_id, ENVS.bot.proj_name, [TextSegment(f"输入：\n{input}")]),
             NodeGocqCustomSegment(sender_id, ENVS.bot.proj_name, [TextSegment(output)]),
         ]
     )
@@ -92,9 +89,7 @@ async def send_with_forward(
         lock(lambda: send_text("其他人正在调用 【代码运行】功能，稍后再试...")),
     ],
 )
-async def compile_code(
-    adapter: Adapter, event: Annotated[MessageEvent, Reflect()]
-) -> None:
+async def compile_code(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
     args = await COMPILE_CMD_PARSER.parse(event.text)
     if args is None:
         return

@@ -8,10 +8,10 @@ from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
 from melobot.utils import if_not, lock
 from melobot.utils.parse import CmdArgs, CmdParser
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
+from ...domain.onebot import get_white_checker
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
-from ...platform.onebot import get_white_checker
 from ...utils import ENG_PUNC, HANS_PUNC, remove_punctuation
 from .. import base_utils as BASE_INFO
 from .wdict import BOT_FLAG, OWNER_FLAG, SENDER_FLAG, WORDS_DICT, add_pair

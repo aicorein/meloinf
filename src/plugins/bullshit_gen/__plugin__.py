@@ -6,8 +6,8 @@ from melobot import PluginPlanner, send_text
 from melobot.protocols.onebot.v11 import on_message
 from melobot.utils.parse import CmdArgs
 
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
 from .gen import BullShitGenerator
 
 BullShitGen = PluginPlanner("1.1.0")
@@ -38,9 +38,7 @@ async def bullshit_gen(args: CmdArgs) -> None:
 
 
 @BullShitGen.use
-@on_message(
-    checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["乱码生成", "ecode"])
-)
+@on_message(checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["乱码生成", "ecode"]))
 async def error_codes() -> None:
     _len = random.randint(50, 300)
     chars = [chr(random.randint(0x0021, 0x9FFF)) for i in range(_len)]

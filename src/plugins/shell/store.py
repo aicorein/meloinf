@@ -6,12 +6,13 @@ from pathlib import Path
 from melobot import get_bot
 from melobot.protocols.onebot.v11 import Adapter
 
-from ...platform.onebot import PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
-from ...platform.onebot import get_owner_checker
+from ...domain.onebot import PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
+from ...domain.onebot import get_owner_checker
 
 
 class Store:
+    started: bool = False
     cwd = str(Path(__file__).parent.resolve())
     shell: asyncio.subprocess.Process
     executable = "powershell" if sys.platform == "win32" else "sh"

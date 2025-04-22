@@ -8,9 +8,9 @@ from melobot.protocols.onebot.v11 import (
 )
 from melobot.utils.parse import CmdArgs
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
+from ...domain.onebot import CmdArgFmtter as Fmtter
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
-from ...platform.onebot import CmdArgFmtter as Fmtter
 from .decks import DeckStore, safe_r_gen
 
 DECKS_MAP = {cmd: group for group in DeckStore.get_all().values() for cmd in group.cmds}
@@ -66,11 +66,7 @@ async def draw_cards(adapter: Adapter, event: MessageEvent, args: CmdArgs) -> No
         output = "当前可用牌堆：\n ● " + "\n ● ".join(DECKS_MAP.keys())
         output += "\n本功能牌堆来源于：\n ● dice 论坛\n ● Github: @Vescrity"
         await adapter.send_forward(
-            [
-                NodeGocqCustomSegment(
-                    event.user_id, ENVS.bot.proj_name, [TextSegment(output)]
-                )
-            ]
+            [NodeGocqCustomSegment(event.user_id, ENVS.bot.proj_name, [TextSegment(output)])]
         )
         return
 
@@ -87,18 +83,14 @@ async def draw_cards(adapter: Adapter, event: MessageEvent, args: CmdArgs) -> No
 
     await adapter.send_forward(
         [
-            NodeGocqCustomSegment(
-                event.user_id, ENVS.bot.proj_name, [TextSegment(sample)]
-            )
+            NodeGocqCustomSegment(event.user_id, ENVS.bot.proj_name, [TextSegment(sample)])
             for sample in samples
         ]
     )
 
 
 @DiceSimulator.use
-@on_message(
-    checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["dice", "dice模拟器"])
-)
+@on_message(checker=COMMON_CHECKER, parser=PARSER_FACTORY.get(targets=["dice", "dice模拟器"]))
 async def dice_info() -> None:
     output = "【dice 模拟器信息】\n ● 牌堆文件数：{}\n ● 牌堆总词条数：{}".format(
         len(DeckStore.get_all()), DeckStore.get_count()

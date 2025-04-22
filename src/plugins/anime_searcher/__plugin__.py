@@ -14,8 +14,8 @@ from melobot.protocols.onebot.v11 import (
 from melobot.session import suspend
 from melobot.utils import cooldown, if_not
 
+from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...env import ENVS
-from ...platform.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...utils import async_http, get_headers
 
 AnimeSearcher = PluginPlanner("1.2.0")
@@ -37,9 +37,7 @@ ANIME_SEARCH_CMD_PARSER = PARSER_FACTORY.get(["番剧识别", "anime"])
         ),
     ],
 )
-async def anime_search(
-    adapter: Adapter, event: Annotated[MessageEvent, Reflect()]
-) -> None:
+async def anime_search(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
     await send_text("发送番剧截图开始识别")
 
     if not await suspend(timeout=20):

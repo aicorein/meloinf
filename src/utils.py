@@ -11,11 +11,11 @@ from .env import ALL_CONFIG, ENVS
 ENG_PUNC = r"""!"#$%&',.:;?@\^"""
 WITHOUT_DOLLAR_ENG_PUNC = r"""!"#%&',.:;?@\^"""
 HANS_PUNC = "。，、；：？！…—·ˉ¨‘’“”々～‖∶＂＇｀〃．"
+_PUNC_REGEX = re.compile(rf"[{re.escape(ENG_PUNC + HANS_PUNC)}]")
 
 
 def remove_punctuation(s: str) -> str:
-    punc = ENG_PUNC + HANS_PUNC
-    return re.sub(rf"[{re.escape(punc)}]", "", s)
+    return _PUNC_REGEX.sub("", s)
 
 
 def base64_encode(data: bytes) -> str:
