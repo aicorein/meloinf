@@ -1,6 +1,8 @@
 import asyncio
 import sys
 
+# sys.path.insert(0, "/home/melody/projects/melobot/src")
+
 if sys.platform != "win32":
     import uvloop
 
@@ -17,7 +19,7 @@ log_args = {
     "to_dir": "../logs",
     "red_error": False,
     "legacy": False,
-    "is_parellel": True,
+    "is_parallel": True,
 }
 
 set_module_logger("melobot", Logger("core", **log_args))

@@ -1,9 +1,11 @@
 import asyncio as aio
 import subprocess
 import time
+from pathlib import Path
 
 import psutil
 from melobot import send_text
+from melobot.bot import bot
 from melobot.exceptions import BotException
 from melobot.handle import stop
 from melobot.log import logger
@@ -12,6 +14,8 @@ from melobot.protocols.onebot.v11 import Adapter, ImageSendSegment, Segment
 from ...utils import base64_encode
 from .. import base_utils
 from .store import Store
+
+bot.load_plugin(Path(__file__).parent.parent.joinpath("base_utils"), load_depth=3)
 
 
 class ShellPluginException(BotException): ...

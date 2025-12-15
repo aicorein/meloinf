@@ -2,18 +2,26 @@
 # It is not intended for manual editing.
 from .shares import onebot_app_name as _onebot_app_name
 from .shares import onebot_app_ver as _onebot_app_ver
-from .shares import onebot_id as _onebot_id
 from .shares import onebot_name as _onebot_name
-from .shares import onebot_other_infos as _onebot_other_infos
+from .shares import format_running_time as _format_running_time
 from .shares import onebot_protocol_ver as _onebot_protocol_ver
-from .funcs import txt2img
+from .shares import format_start_moment as _format_start_moment
+from .shares import onebot_id as _onebot_id
+from .shares import running_time as _running_time
+from .shares import start_moment as _start_moment
+from .shares import onebot_other_infos as _onebot_other_infos
 from .funcs import wrap_s
+from .funcs import txt2img
 
 onebot_app_name = _onebot_app_name.get()
 onebot_app_ver = _onebot_app_ver.get()
-onebot_id = _onebot_id.get()
 onebot_name = _onebot_name.get()
-onebot_other_infos = _onebot_other_infos.get()
+format_running_time = _format_running_time.get()
 onebot_protocol_ver = _onebot_protocol_ver.get()
+format_start_moment = _format_start_moment.get()
+onebot_id = _onebot_id.get()
+running_time = _running_time.get()
+start_moment = _start_moment.get()
+onebot_other_infos = _onebot_other_infos.get()
 
-__all__ = ('onebot_app_name', 'onebot_app_ver', 'onebot_id', 'onebot_name', 'onebot_other_infos', 'onebot_protocol_ver', 'txt2img', 'wrap_s')
+__all__ = ('onebot_app_name', 'onebot_app_ver', 'onebot_name', 'format_running_time', 'onebot_protocol_ver', 'format_start_moment', 'onebot_id', 'running_time', 'start_moment', 'onebot_other_infos', 'wrap_s', 'txt2img')

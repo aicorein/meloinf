@@ -2,13 +2,12 @@ from typing import Annotated
 
 from melobot import PluginPlanner, send_text
 from melobot.bot import bot
-from melobot.di import Reflect
+from melobot.di import Depends, Reflect, inject_deps
 from melobot.handle import get_event, stop
 from melobot.log import logger
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
-from melobot.session import SessionStore, get_session_store, suspend
-from melobot.utils import if_not
-from melobot.utils.parse import CmdArgs
+from melobot.session import get_session_arg, get_session_store, suspend
+from melobot.utils import if_
 
 from ...domain.onebot import COMMON_CHECKER
 from .store import Store
@@ -30,21 +29,18 @@ async def close_shell_service() -> None:
 
 
 @Shell.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(
-            lambda: Store.shell_cmd_paser.parse(get_event().text),
-            reject=stop,
-            accept=lambda args: get_session_store().set("args", args) if args else None,
-        ),
-        if_not(lambda: Store.shell_checker.check(get_event()), reject=stop),
-    ],
+@on_message(checker=COMMON_CHECKER, legacy_session=True)
+@if_(
+    lambda: Store.shell_cmd_paser.parse(get_event().text),
+    reject=stop,
+    accept=lambda args: get_session_store().set("cmd_args", args) if args else None,
 )
-async def run_in_shell(store: SessionStore, event: Annotated[MessageEvent, Reflect()]) -> None:
-    args: CmdArgs = store["args"]
-    cmd = args.vals[0]
+@if_(lambda: Store.shell_checker.check(get_event()), reject=stop)
+@inject_deps
+async def run_in_shell(
+    event: Annotated[MessageEvent, Reflect()],
+    cmd: Annotated[str | None, Depends(get_session_arg("cmd_args"), lambda args: args.vals[0])],
+) -> None:
     if cmd is None:
         Store.pointer = (
             event.user_id,

@@ -1,11 +1,16 @@
 from functools import partial
+from typing import Annotated
 
 from melobot import Bot, PluginLifeSpan, PluginPlanner, send_text
+from melobot.di import inject_deps
 from melobot.handle import Flow, get_event, stop
 from melobot.log import logger
 from melobot.protocols.onebot.v11 import MessageEvent, on_message
 from melobot.session import Rule, Session, SessionStore, enter_session
-from melobot.utils import if_not, unfold_ctx
+from melobot.session import get_session_arg as s_arg
+from melobot.session import get_session_store, suspend
+from melobot.utils import if_, unfold_ctx
+from melobot.utils.parse import CmdArgs
 
 from ...domain.onebot import PARSER_FACTORY, get_owner_checker
 
@@ -70,13 +75,10 @@ rule = Rule[MessageEvent].new(lambda e1, e2: e1.scope == e2.scope)
 
 
 @PriorityDebug.use
-@on_message(
-    checker=OWNER_CHECKER,
-    decos=[
-        if_not(lambda: PARSER.parse(get_event().text), reject=stop),
-        unfold_ctx(lambda: enter_session(rule, keep=True)),
-    ],
-)
+@on_message(checker=OWNER_CHECKER)
+@if_(lambda: PARSER.parse(get_event().text), reject=stop)
+@unfold_ctx(lambda: enter_session(rule, keep=True))
+@inject_deps
 async def session_test(session: Session, store: SessionStore) -> None:
     cnt = store.setdefault("cnt", 0)
     await send_text(f"{cnt}")
@@ -84,3 +86,28 @@ async def session_test(session: Session, store: SessionStore) -> None:
         session.stop_keep()
     else:
         store.set("cnt", cnt + 1)
+
+
+PARSER2 = PARSER_FACTORY.get(
+    "atest",
+)
+
+rule2 = Rule[MessageEvent].new(lambda e1, e2: e1.scope == e2.scope)
+
+
+@PriorityDebug.use
+@on_message(checker=OWNER_CHECKER)
+@unfold_ctx(lambda: enter_session(rule2, keep=True, auto_release=False))
+@if_(
+    lambda: PARSER2.parse(get_event().text),
+    reject=stop,
+    accept=lambda a: get_session_store().set("args", a),
+)
+@inject_deps
+async def another_test(session: Session, args: Annotated[CmdArgs, s_arg("args")]) -> None:
+    await send_text(f"args: {args}")
+    ev = get_event()
+    await suspend()
+    await send_text(f"resumed: {get_event()}")
+    session.release(ev)
+    session.stop_keep()

@@ -13,7 +13,8 @@ from melobot.protocols.onebot.v11 import (
     on_message,
 )
 from melobot.session import suspend
-from melobot.utils import if_not, lock, timelimit
+from melobot.utils import if_, lock, timelimit
+from melobot.utils.parse import get_cmd_arg as c_arg
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...domain.onebot import CmdArgFmtter as Fmtter
@@ -81,14 +82,9 @@ async def send_with_forward(adapter: Adapter, sender_id: int, input: str, output
 
 
 @CodeCompile.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(lambda: COMPILE_CMD_PARSER.parse(get_event().text), reject=stop),
-        lock(lambda: send_text("其他人正在调用 【代码运行】功能，稍后再试...")),
-    ],
-)
+@on_message(checker=COMMON_CHECKER, legacy_session=True)
+@if_(lambda: COMPILE_CMD_PARSER.parse(get_event().text), reject=stop)
+@lock(lambda: send_text("其他人正在调用 【代码运行】功能，稍后再试..."))
 async def compile_code(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
     args = await COMPILE_CMD_PARSER.parse(event.text)
     if args is None:
@@ -121,14 +117,9 @@ async def compile_code(adapter: Adapter, event: Annotated[MessageEvent, Reflect(
 
 
 @CodeCompile.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(lambda: CALC_CMD_PARSER.parse(get_event().text), reject=stop),
-        lock(lambda: send_text("其他人正在调用【计算】功能，稍后再试...")),
-    ],
-)
+@on_message(checker=COMMON_CHECKER, legacy_session=True)
+@if_(lambda: CALC_CMD_PARSER.parse(get_event().text), reject=stop)
+@lock(lambda: send_text("其他人正在调用【计算】功能，稍后再试..."))
 async def calc(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
     await send_text("输入表达式开始求值（遵循 py 语法）")
     if not await suspend(timeout=10):

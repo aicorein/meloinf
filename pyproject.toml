@@ -6,9 +6,9 @@ authors = [
     {name = "aicorein", email = "aicorein@meloland.org"},
 ]
 dependencies = [
-    "melobot>=3.1.1",
-    "melobot[onebot]>=3.1.1",
-    "melobot[cli]>=3.1.1",
+    "melobot>=3.3.0",
+    "melobot[onebot]>=3.3.0",
+    "melobot[cli]>=3.3.0",
     "uvloop>=0.21.0; sys_platform != 'win32'",
     "pillow>=11.0.0",
     "psutil>=6.1.1",

@@ -3,7 +3,7 @@ from typing import cast
 from melobot import Flow
 from melobot.adapter import Event, TextEvent
 from melobot.di import inject_deps
-from melobot.handle import nextn, no_deps_node, node
+from melobot.handle import nextn, node
 from melobot.log import logger
 from melobot.protocols.onebot.v11 import GroupMessageEvent, PrivateMessageEvent
 from melobot.utils import RWContext, unfold_ctx
@@ -36,7 +36,7 @@ async def n1() -> None:
 
 
 @f.after(n1)
-@no_deps_node
+@node
 @unfold_ctx(rw_ctx.read)
 @inject_deps
 # 通过依赖注入区分调用结点
@@ -45,7 +45,7 @@ async def n2(e: PrivateMessageEvent) -> None:
 
 
 @f.after(n1)
-@no_deps_node
+@node
 @unfold_ctx(rw_ctx.write)
 @inject_deps
 # 通过依赖注入区分调用结点

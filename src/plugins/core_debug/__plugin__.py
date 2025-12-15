@@ -7,7 +7,7 @@ from melobot.di import Reflect
 from melobot.handle import get_event, stop
 from melobot.protocols.onebot.v11 import Adapter, ImageSegment, MessageEvent, on_message
 from melobot.session import suspend
-from melobot.utils import if_not
+from melobot.utils import if_
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY, get_owner_checker
 from ...utils import base64_encode
@@ -36,14 +36,9 @@ async def format_send(send_func: Callable, s: str) -> None:
 
 
 @CoreDbg.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(lambda: Store.parser.parse(get_event().text), reject=stop),
-        if_not(lambda: Store.checker.check(get_event()), reject=stop),
-    ],
-)
+@on_message(checker=COMMON_CHECKER, legacy_session=True)
+@if_(lambda: Store.parser.parse(get_event().text), reject=stop)
+@if_(lambda: Store.checker.check(get_event()), reject=stop)
 async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> None:
     await send_text("【你已进入核心调试状态】\n" + "注意 ⚠️：错误操作可能导致崩溃，请谨慎操作！")
     await send_text(
@@ -101,7 +96,7 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
                         continue
 
                     exec(f"{pointer}={text}", var_map)
-                    val = eval(f"{pointer}", var_map)
+                    val = eval(f"{pointer}", globals() | var_map)
                     await format_send(send_text, f"修改后的值为：{val}\n" f"类型：{type(val)}")
 
                 except Exception as e:
@@ -110,7 +105,7 @@ async def core_dbg(adapter: Adapter, ev: Annotated[MessageEvent, Reflect()]) -> 
             case _:
                 try:
                     text = ev.text
-                    val = eval(f"{text}", var_map)
+                    val = eval(f"{text}", globals() | var_map)
                     pointer = text
                     await format_send(adapter.send_reply, str(val))
 

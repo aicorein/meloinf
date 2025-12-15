@@ -12,7 +12,7 @@ from melobot.protocols.onebot.v11 import (
     on_message,
 )
 from melobot.session import suspend
-from melobot.utils import cooldown, if_not
+from melobot.utils import cooldown, if_
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...env import ENVS
@@ -25,17 +25,12 @@ ANIME_SEARCH_CMD_PARSER = PARSER_FACTORY.get(["番剧识别", "anime"])
 
 
 @AnimeSearcher.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(lambda: ANIME_SEARCH_CMD_PARSER.parse(get_event().text), reject=stop),
-        cooldown(
-            lambda: send_text("当前有一个识番任务运行中，稍候再试~"),
-            lambda t: send_text(f"识番功能冷却中，剩余：{t:.2f}s"),
-            interval=8,
-        ),
-    ],
+@on_message(checker=COMMON_CHECKER, legacy_session=True)
+@if_(lambda: ANIME_SEARCH_CMD_PARSER.parse(get_event().text), reject=stop)
+@cooldown(
+    lambda: send_text("当前有一个识番任务运行中，稍候再试~"),
+    lambda t: send_text(f"识番功能冷却中，剩余：{t:.2f}s"),
+    interval=8,
 )
 async def anime_search(adapter: Adapter, event: Annotated[MessageEvent, Reflect()]) -> None:
     await send_text("发送番剧截图开始识别")

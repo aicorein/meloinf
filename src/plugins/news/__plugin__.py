@@ -15,7 +15,7 @@ from ...utils import async_http, base64_encode, get_headers
 
 EveryDayNews = PluginPlanner("1.0.0")
 
-NEWS_API = "https://api.03c3.cn/api/zb?type=img"
+NEWS_API = "http://api.03c3.cn/api/zb?type=img"
 NEWS_TIME = tuple(map(int, ENVS.bot.news_time.split(":")))
 if len(NEWS_TIME) != 3:
     raise ValueError("每日新闻时间的配置，必须是完整的 <时:分:秒> 格式")
@@ -26,7 +26,7 @@ class EveryDayNewsError(BotException): ...
 
 
 async def get_news_image() -> str | None:
-    async with async_http(NEWS_API, "get", headers=get_headers()) as resp:
+    async with async_http(NEWS_API, "get", headers=get_headers(), verify_ssl=False) as resp:
         if resp.status != 200:
             get_bot().logger.error(f"每日新闻图片获取异常，状态码：{resp.status}")
             return None

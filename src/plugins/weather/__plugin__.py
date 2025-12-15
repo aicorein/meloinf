@@ -6,7 +6,7 @@ from melobot import PluginPlanner, get_bot, send_text
 from melobot.log import logger
 from melobot.protocols.onebot.v11 import Adapter, ImageSendSegment, on_message
 from melobot.utils import lock, timelimit
-from melobot.utils.parse import CmdArgs
+from melobot.utils.parse import get_cmd_arg as c_arg
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...domain.onebot import CmdArgFmtter as Fmtter
@@ -54,16 +54,13 @@ async def _send_req(url: str, city: str) -> AsyncGenerator[aiohttp.ClientRespons
             ),
         ],
     ),
-    decos=[
-        lock(lambda: send_text("请等待前一个天气获取任务完成，稍后再试~")),
-        timelimit(
-            lambda: get_bot().get_adapter(Adapter).send_reply("天气信息获取超时，请稍候再试..."),
-            timeout=25,
-        ),
-    ],
 )
-async def weather(adapter: Adapter, args: CmdArgs) -> None:
-    city, days = args.vals
+@lock(lambda: send_text("请等待前一个天气获取任务完成，稍后再试~"))
+@timelimit(
+    lambda: get_bot().get_adapter(Adapter).send_reply("天气信息获取超时，请稍候再试..."),
+    timeout=25,
+)
+async def weather(adapter: Adapter, city: str = c_arg(0), days: int = c_arg(1)) -> None:
     textlines: list[str] = []
     min_temps: list[int] = []
     max_temps: list[int] = []

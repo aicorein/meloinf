@@ -5,7 +5,7 @@ from melobot import PluginPlanner, send_text
 from melobot.bot import bot
 from melobot.handle import get_event, stop
 from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
-from melobot.utils import if_not, lock
+from melobot.utils import if_, lock
 from melobot.utils.parse import CmdArgs, CmdParser
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
@@ -83,16 +83,9 @@ async def get_wlib_info() -> None:
 
 
 @WordLib.use
-@on_message(
-    checker=COMMON_CHECKER,
-    parser=TEACH_PARSER,
-    decos=[
-        if_not(lambda: TEACH_CHECKER.check(get_event()), reject=stop),
-        lock(
-            lambda: OB_ADAPTER.send_reply(f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~")
-        ),
-    ],
-)
+@on_message(checker=COMMON_CHECKER, parser=TEACH_PARSER)
+@if_(lambda: TEACH_CHECKER.check(get_event()), reject=stop)
+@lock(lambda: OB_ADAPTER.send_reply(f"{NICKNAME} 学不过来啦，等 {NICKNAME} 先学完上一句嘛~"))
 async def wlib_teach(adapter: Adapter, args: CmdArgs) -> None:
     ask, ans = args.vals
     punc = ENG_PUNC.replace("$", "") + HANS_PUNC

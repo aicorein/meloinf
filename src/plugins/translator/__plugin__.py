@@ -1,13 +1,10 @@
 import hashlib
-from typing import Annotated
 
 from melobot import PluginPlanner, send_text
-from melobot.di import Reflect
-from melobot.handle import get_event, stop
 from melobot.log import logger
-from melobot.protocols.onebot.v11 import Adapter, MessageEvent, on_message
-from melobot.session import SessionStore, get_session_store, suspend
-from melobot.utils import cooldown, if_not
+from melobot.protocols.onebot.v11 import Adapter, on_message
+from melobot.utils import cooldown
+from melobot.utils.parse import get_cmd_arg as c_arg
 
 from ...domain.onebot import COMMON_CHECKER, PARSER_FACTORY
 from ...domain.onebot import CmdArgFmtter as Fmtter
@@ -29,51 +26,29 @@ TRANSLATE_CMD_PARSER = PARSER_FACTORY.get(
             validate=lambda x: x in ["en", "zh", "jp"],
             src_desc="翻译目标语种",
             src_expect="值为 [en, zh, jp] 其中之一",
-            default="zh",
+            key="lang",
         ),
         Fmtter(
             validate=lambda x: len(x) <= 1000 if x is not None else True,
             src_desc="要翻译的文本",
             src_expect="字符数 <= 1000",
-            default=None,
+            key="text",
         ),
     ],
+    interactive=True,
 )
 
 
 @Translator.use
-@on_message(
-    checker=COMMON_CHECKER,
-    legacy_session=True,
-    decos=[
-        if_not(
-            lambda: TRANSLATE_CMD_PARSER.parse(get_event().text),
-            reject=stop,
-            accept=lambda args: get_session_store().set("args", args) if args else None,
-        ),
-        cooldown(
-            lambda: send_text("当前有一个翻译任务运行中，稍候再试~"),
-            lambda t: send_text(f"翻译功能冷却中，剩余：{t:.2f}s"),
-            interval=8,
-        ),
-    ],
+@on_message(checker=COMMON_CHECKER, parser=TRANSLATE_CMD_PARSER)
+@cooldown(
+    lambda: send_text("当前有一个翻译任务运行中，稍候再试~"),
+    lambda t: send_text(f"翻译功能冷却中，剩余：{t:.2f}s"),
+    interval=8,
 )
 async def translate_text(
-    adapter: Adapter,
-    store: SessionStore,
-    event: Annotated[MessageEvent, Reflect()],
+    adapter: Adapter, lang: str = c_arg("lang"), text: str = c_arg("text")
 ) -> None:
-    lang, _text = store["args"].vals
-
-    if _text is None:
-        await send_text("输入要翻译的文本")
-        if not await suspend(timeout=20):
-            await send_text("等待超时，翻译任务已取消")
-            return
-        text = event.text
-    else:
-        text = _text
-
     sign = API_APPID + text + API_HASH_SALT + API_KEY
     md5 = hashlib.md5()
     md5.update(sign.encode("utf-8"))

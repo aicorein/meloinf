@@ -55,15 +55,15 @@ BaseUtils = PluginPlanner(
 
 ob_adapter: Adapter = bot.get_adapter(Adapter)
 
+if ob_adapter is not None:
 
-@ob_adapter.on(AdapterLifeSpan.BEFORE_EVENT_HANDLE)
-async def count_events(*_, **__) -> None:
-    Store.onebot_recv_events += 1
+    @ob_adapter.on(AdapterLifeSpan.BEFORE_EVENT_HANDLE)
+    async def count_events(*_, **__) -> None:
+        Store.onebot_recv_events += 1
 
-
-@ob_adapter.on(AdapterLifeSpan.BEFORE_ACTION_EXEC)
-async def count_actions(*_, **__) -> None:
-    Store.onebot_sent_actions += 1
+    @ob_adapter.on(AdapterLifeSpan.BEFORE_ACTION_EXEC)
+    async def count_actions(*_, **__) -> None:
+        Store.onebot_sent_actions += 1
 
 
 @bot.on_started
