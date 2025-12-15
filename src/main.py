@@ -1,16 +1,7 @@
-import asyncio
-import sys
-
-# sys.path.insert(0, "/home/melody/projects/melobot/src")
-
-if sys.platform != "win32":
-    import uvloop
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
 from melobot import Bot
 from melobot.log import Logger, set_module_logger
 from melobot.protocols.onebot.v11 import OneBotV11Protocol
+from uvloop import Loop
 
 from env import ENVS, get_onebot_io
 
@@ -30,4 +21,4 @@ set_module_logger(
 bot = Bot(ENVS.bot.bot_name, logger=Logger(ENVS.bot.proj_name, **log_args))
 bot.add_protocol(OneBotV11Protocol(get_onebot_io()))
 bot.load_plugins_dir("plugins", load_depth=3)
-bot.run()
+bot.run(loop_factory=Loop)
