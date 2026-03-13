@@ -1,5 +1,4 @@
 <div align="center">
-  <img width=256 src="https://github.com/Meloland/melobot/blob/main/docs/source/_static/logo.png?raw=true" />
   <h1>meloinf</h1>
   <p>
     <strong>一个简简单单的 bot，基于 melobot</strong>
